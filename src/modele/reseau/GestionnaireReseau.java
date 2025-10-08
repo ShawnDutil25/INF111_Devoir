@@ -1,13 +1,13 @@
 package modele.reseau;
 
 /**
- * Le gestionnaire réseau est responsable de gérer les connexions cellulaires et de relayer
+ * Le gestionnaire rï¿½seau est responsable de gï¿½rer les connexions cellulaires et de relayer
  * les appels, messages et fin d'appel.
  * 
- * Dans le cadre de la simulation, c'est également le gestionnaire réseau qui instancie Antennes et
- * cellulaire et qui gère l'exécution par tour des cellulaires.
+ * Dans le cadre de la simulation, c'est ï¿½galement le gestionnaire rï¿½seau qui instancie Antennes et
+ * cellulaire et qui gï¿½re l'exï¿½cution par tour des cellulaires.
  * 
- * Le gestionnaire réseau est un singleton
+ * Le gestionnaire rï¿½seau est un singleton
  * 
  * @author Fred Simard
  * @version Hiver 2021
@@ -16,13 +16,17 @@ package modele.reseau;
 
 import observer.MonObservable;
 
+import java.util.ArrayList;
+
 public class GestionnaireReseau extends MonObservable implements Runnable {
 
+	public static final ArrayList<String> NB_CRIMINELS = new ArrayList<>();
+	public static final ArrayList<String> NB_CELLULAIRES = new ArrayList<>();
 	private boolean mondeEnVie = true;
 	private static GestionnaireReseau instance = new GestionnaireReseau();
 
 	/**
-	 * méthode permettant d'obtenir une référence sur le Gestionnaire Réseau
+	 * mï¿½thode permettant d'obtenir une rï¿½fï¿½rence sur le Gestionnaire Rï¿½seau
 	 * @return instance
 	 */
 	public static GestionnaireReseau getInstance() {
@@ -32,8 +36,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	private GestionnaireReseau() {}
 
 	/**
-	 * permet de mettre fin à la simulation
-	 * @param mondeEnVie
+	 * permet de mettre fin ï¿½ la simulation
 	 */
 	public void finDeSimulation() {
 		this.mondeEnVie = false;
@@ -41,7 +44,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 
 
 	/**
-	 * s'exécute en continue pour simuler le système
+	 * s'exï¿½cute en continue pour simuler le systï¿½me
 	 */
 	@Override
 	public void run() {
