@@ -14,16 +14,36 @@ package modele.reseau;
  */
 
 
+import modele.communication.Connexion;
+import modele.gestionnaires.GestionnaireScenario;
+import modele.physique.Carte;
+import modele.physique.Position;
 import observer.MonObservable;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class GestionnaireReseau extends MonObservable implements Runnable {
 
 	public static final ArrayList<String> NB_CRIMINELS = new ArrayList<>();
 	public static final ArrayList<String> NB_CELLULAIRES = new ArrayList<>();
+	public static final int PERIODE_SIMULATION_MS = 100;
+	public static final double VITESSE = 10.0;
+	public static final double DEVIATION_STANDARD = 0.05;
+	public static final int NB_CELLULAIRE = 1;
+	public static final int NB_ANTENNES = 10;
+	public static final int CODE_NON_CONNECTE = -1;
+
+
 	private boolean mondeEnVie = true;
 	private static GestionnaireReseau instance = new GestionnaireReseau();
+
+	private Random random = new Random();
+	private ArrayList<Antenne> antennes = new ArrayList<>();
+	private ArrayList<Cellulaire> cellulaires = new ArrayList<>();
+	private static List<Connexion> listOrdonne = new ArrayList<>();
+
 
 	/**
 	 * m�thode permettant d'obtenir une r�f�rence sur le Gestionnaire R�seau
@@ -32,8 +52,8 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	public static GestionnaireReseau getInstance() {
 		return instance;
 	}
-	
-	private GestionnaireReseau() {}
+
+
 
 	/**
 	 * permet de mettre fin � la simulation
@@ -42,33 +62,151 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 		this.mondeEnVie = false;
 	}
 
+	/**
+	 * Crée et ajoute les antennes dans la simulation.
+	 * Positionne chaque antenne aléatoirement.
+	 * @author Shawn Dutil
+	 * @version Automne 2025
+	 */
+	private void creeAntennes(){
+		for (int i = 0; i < NB_ANTENNES; i++) {
 
+			Position position = Carte.genererPositionAleatoire();
+			Antenne antenne = new Antenne(position);
+			antennes.add(antenne);
+		}
+	}
+	/**
+	 * Crée et ajoute les cellulaires dans la simulation.
+	 * Chaque cellulaire reçoit un numéro unique et une position aléatoire.
+	 * @author Shawn Dutil
+	 * @version Automne 2025
+	 */
+	private void creeCellulaires(){
+		for (int i = 0; i < NB_CELLULAIRE; i++) {
+
+			Position position = Carte.genererPositionAleatoire();
+			Cellulaire cellulaire = new Cellulaire(GestionnaireScenario.obtenirNouveauNumeroStandard(),position,VITESSE,DEVIATION_STANDARD);
+			cellulaires.add(cellulaire);
+		}
+	}
+	/**
+	 * Retourne l'antenne la plus proche d'une position donnée.
+	 * @param position position du cellulaire
+	 * @return antenne la plus proche
+	 */
+	public Antenne getAntenneProche(Position position) {
+		Antenne antenneProche = null;
+		double distanceMin = Double.MAX_VALUE;
+
+		for (Antenne antenne : antennes) {
+			double distance = antenne.distance(position);
+			if (distance < distanceMin) {
+				distanceMin = distance;
+				antenneProche = antenne;
+			}
+		}
+
+		return antenneProche;
+	}
+
+
+	/**
+	 * Recherche une connexion dans la liste ordonnée par numéro de connexion.
+	 * Utilise la recherche binaire pour que sa soit plus rapide.
+	 * Insipiration de ce vidéo documentative : https://www.youtube.com/watch?v=gsaQRO0cU7Q
+	 * @author Shawn Dutil
+	 * @version Automne 2025
+	 *
+	 * @param numeroConnexion numéro de la connexion recherchée
+	 * @return la connexion correspondante ou null si non trouvée
+	 */
+	public Connexion getConnexion(int numeroConnexion) {
+		int indiceDebut = 0;
+		int indiceFin = listOrdonne.size() -1;
+
+		while(indiceDebut <= indiceFin){
+			int indiceMilieu = (indiceDebut + indiceFin) / 2;
+
+			if(listOrdonne.get(indiceMilieu).getNumeroConnexion() == numeroConnexion){
+				return listOrdonne.get(indiceMilieu);
+			} else if (listOrdonne.get(indiceMilieu).getNumeroConnexion() < numeroConnexion) {
+				indiceDebut = indiceMilieu + 1;
+			} else {
+				indiceFin = indiceMilieu - 1;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Insère une connexion dans la liste ordonnée en conservant l'ordre croissant
+	 * selon le numéro de connexion.
+	 * @author Shawn Dutil
+	 * @version Automne 2025
+	 *
+	 * @param connexion connexion à insérer
+	 */
+	public void insererConnexion(Connexion connexion){
+		int compteur = 0;
+
+
+		while (true) {
+			// Si on est arrivé à la fin de la liste, insérer à la fin
+			if (compteur >= listOrdonne.size()) {
+				listOrdonne.add(connexion);
+				break;
+			}
+
+			// Si le numéro actuel est plus grand ou égal, on insère ici
+			if (listOrdonne.get(compteur).getNumeroConnexion() >= connexion.getNumeroConnexion()) {
+				listOrdonne.add(compteur, connexion);
+				break;
+			}
+
+			compteur++;
+		}
+	}
+	/**
+	 * @return la liste des antennes
+	 * */
+	public ArrayList<Antenne> getAntennes() {
+		return antennes;
+	}
+	/**
+	 * @return la liste des cellulaires
+	 * */
+	public ArrayList<Cellulaire> getCellulaires() {
+		return cellulaires;
+	}
 	/**
 	 * s'ex�cute en continue pour simuler le syst�me
 	 */
 	@Override
 	public void run() {
-		
-		/*
+
+
 		creeAntennes();
 		creeCellulaires();
 		this.avertirLesObservers();
 
-		while(this.mondeEnVie) {	
-			
+		while(this.mondeEnVie) {
+
 			for(Cellulaire cell : cellulaires) {
 				cell.effectuerTour();
+				System.out.println("Cellulaire connecté à : " + cell.getAntenneConnecte());
 			}
-			
+
 			this.avertirLesObservers();
-			
-			
+
+
 			try {
 				Thread.sleep(PERIODE_SIMULATION_MS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}*/
+		}
 	}
-	
+
+
 }
