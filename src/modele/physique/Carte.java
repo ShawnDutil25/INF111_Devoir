@@ -2,12 +2,28 @@ package modele.physique;
 
 import java.util.Random;
 
+/**
+ * Cette classe carte est modélisée comme une surface rectangulaire de dimensions fixes
+ * (1920x1080). Elle offre des méthodes utilitaires pour générer des positions
+ * aléatoires et ajuster les positions qui sortent des limites de la carte selon
+ * une logique de toroïde — c’est-à-dire que les objets qui sortent d’un côté
+ * réapparaissent de l’autre.
+ *
+ * @author Shawn Dutil
+ * @version Automne 2025
+ */
 public final class Carte {
+
 
     public static final Position TAILLE_CARTE = new Position(1920, 1080);
     public static final Random RANDOM = new Random();
 
 
+    /**
+     * Génère une position aléatoire comprise à l’intérieur des limites de la carte.
+     *
+     * @return une instance de la position contenant des coordonnées aléatoires entre 0 et la taille maximale de la carte.
+     */
     public static Position genererPositionAleatoire() {
 
         double aleatoireX = RANDOM.nextDouble() * TAILLE_CARTE.getPositionX();
@@ -18,6 +34,15 @@ public final class Carte {
         return position;
     }
 
+    /**
+     * Ajuste la position donnée selon la logique du toroïde.
+     * Si la position sort à droite, elle réapparaît à gauche (X = 0).
+     * Si elle sort à gauche, elle réapparaît à droite (X = largeur de la carte).
+     * Si elle sort en bas, elle réapparaît en haut (Y = 0).
+     * Si elle sort en haut, elle réapparaît en bas (Y = hauteur de la carte).
+     *
+     * @param position ajuste les coordonnées s'elles sortent des limites.
+     */
     public static void ajusterPosition(Position position) {
 
         // Vérification de la coordonnée X
