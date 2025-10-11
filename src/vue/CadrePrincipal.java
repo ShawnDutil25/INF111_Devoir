@@ -14,14 +14,14 @@ import javax.swing.JOptionPane;
 
 public class CadrePrincipal extends JFrame implements Runnable{
 
-	//PanneauPrincipal panneauPrincipal;
+	PanneauPrincipal panneauPrincipal;
 	Dimension tailleEcran = Toolkit.getDefaultToolkit().getScreenSize();
 	
 	@Override
 	public void run() {
 		
 		initCadre();
-		//initPanneau();
+		initPanneau();
 
     	setVisible(true);
 	}
@@ -58,14 +58,14 @@ public class CadrePrincipal extends JFrame implements Runnable{
 		
 	}
 
-//	private void initPanneau() {
-//
-//        // instancie notre panneau principal
-//		panneauPrincipal = new PanneauPrincipal(tailleEcran);
-//
-//        // cette ligne remplace le JPanel existant dans le JFrame
-//        // par notre classe définis
-//		this.setContentPane(panneauPrincipal);
-//	}
+	private void initPanneau() {
+
+        // instancie notre panneau principal
+		panneauPrincipal = new PanneauPrincipal(tailleEcran);
+
+        // cette ligne remplace le JPanel existant dans le JFrame
+        // par notre classe définis
+		this.setContentPane(panneauPrincipal);
+	}
 
 }

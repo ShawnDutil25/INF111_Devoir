@@ -12,6 +12,5 @@ public class ProgrammePrincipal {
 		
     	Thread t = new Thread(new CadrePrincipal());
     	t.start();
-    	
 	}
 }
