@@ -15,6 +15,7 @@ package modele.reseau;
 
 
 import modele.communication.Connexion;
+import modele.communication.Message;
 import modele.gestionnaires.GestionnaireScenario;
 import modele.physique.Carte;
 import modele.physique.Position;
@@ -31,7 +32,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	public static final int PERIODE_SIMULATION_MS = 100;
 	public static final double VITESSE = 10.0;
 	public static final double DEVIATION_STANDARD = 0.05;
-	public static final int NB_CELLULAIRE = 1;
+	public static final int NB_CELLULAIRE = 30;
 	public static final int NB_ANTENNES = 10;
 	public static final int CODE_NON_CONNECTE = -1;
 
@@ -43,7 +44,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	private ArrayList<Antenne> antennes = new ArrayList<>();
 	private ArrayList<Cellulaire> cellulaires = new ArrayList<>();
 	private static List<Connexion> listOrdonne = new ArrayList<>();
-
+	private int compteurConnexion = 0;
 
 	/**
 	 * m�thode permettant d'obtenir une r�f�rence sur le Gestionnaire R�seau
@@ -52,7 +53,6 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	public static GestionnaireReseau getInstance() {
 		return instance;
 	}
-
 
 
 	/**
@@ -91,6 +91,24 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 		}
 	}
 	/**
+	 * Met à jour l'antenne d'une connexion existante.
+	 * Remplace la référence 'ancienne' par 'nouvelle' dans la Connexion correspondante.
+	 *
+	 * @param numeroConnexion numéro de la connexion à mettre à jour
+	 * @param ancienneAntenne       référence à l'ancienne antenne
+	 * @param nouvelleAntenne       référence à la nouvelle antenne
+	 */
+	public void mettreAJourConnexion(int numeroConnexion, Antenne ancienneAntenne, Antenne nouvelleAntenne){
+
+		Connexion connexion = getConnexion(numeroConnexion);
+
+		if(connexion == null){
+			return;
+		}
+		connexion.mettreAJourAntenne(ancienneAntenne,nouvelleAntenne);
+	}
+
+	/**
 	 * Retourne l'antenne la plus proche d'une position donnée.
 	 * @param position position du cellulaire
 	 * @return antenne la plus proche
@@ -121,7 +139,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	 * @param numeroConnexion numéro de la connexion recherchée
 	 * @return la connexion correspondante ou null si non trouvée
 	 */
-	public Connexion getConnexion(int numeroConnexion) {
+	private static Connexion getConnexion(int numeroConnexion) {
 		int indiceDebut = 0;
 		int indiceFin = listOrdonne.size() -1;
 
@@ -168,6 +186,66 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 		}
 	}
 	/**
+	 * Relaye la demande d’appel à travers toutes les antennes du réseau.
+	 * Si une antenne trouve le cellulaire destinataire, une Connexion est créée.
+	 * @param antenneSource antenne de l’appelant
+	 * @param numeroDestination numéro du cellulaire appelé
+	 * @param numeroAppelant numéro du cellulaire appelant
+	 * @return un identifiant de connexion (>0) si succès, CODE_NON_CONNECTE sinon
+	 */
+	public int relayerAppel(Antenne antenneSource, String numeroDestination, String numeroAppelant) {
+		int numeroConnexion = ++compteurConnexion; // génère un identifiant unique (>0)
+
+
+		for (Antenne antenne : antennes) {
+			Cellulaire cible = antenne.repondre(numeroDestination, numeroAppelant, numeroConnexion);
+			if (cible != null) {
+
+				Connexion connexion = new Connexion(numeroConnexion, antenneSource, antenne);
+				insererConnexion(connexion);
+
+				return numeroConnexion;
+			}
+		}
+		return CODE_NON_CONNECTE;
+	}
+
+	public static void relayerMessage(Message message, int numeroConnexion) {
+
+		Connexion connexion = getConnexion(numeroConnexion);
+		if (connexion == null) {
+			return;
+		}
+
+
+		Antenne antenneDestination = connexion.getAntenneDestination();
+		if (antenneDestination == null) {
+			System.out.println("Antenne destinataire non trouvée");
+			return;
+		}
+
+		antenneDestination.recevoir(message);
+	}
+
+	public void relayerFinAppel(int numeroConnexion) {
+		// Cherche la connexion existante
+		Connexion connexion = getConnexion(numeroConnexion);
+		if (connexion == null) return;
+
+		// Prévenir l’antenne distante que l’appel est terminé
+		Antenne antenneDest = connexion.getAntenneDestination();
+		if (antenneDest != null) {
+			antenneDest.finAppelDistant("", numeroConnexion);
+		}
+
+		// Supprimer la connexion de la liste
+		listOrdonne.remove(connexion);
+	}
+
+
+
+
+	/**
 	 * @return la liste des antennes
 	 * */
 	public ArrayList<Antenne> getAntennes() {
@@ -194,7 +272,6 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 
 			for(Cellulaire cell : cellulaires) {
 				cell.effectuerTour();
-				System.out.println("Cellulaire connecté à : " + cell.getAntenneConnecte());
 			}
 
 			this.avertirLesObservers();

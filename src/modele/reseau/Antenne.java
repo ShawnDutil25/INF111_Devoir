@@ -24,7 +24,9 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
 
     private final GestionnaireReseau gestionnaireReseau = GestionnaireReseau.getInstance();
     private static ArrayList<Cellulaire> tdaCellulaire = new ArrayList<>();
-
+    public static ArrayList<Cellulaire> getTdaCellulaire() {
+        return tdaCellulaire;
+    }
     /**
      * Constructeur paramétré permettant d'initialiser la position de l'objet.
      *
@@ -56,6 +58,17 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
     }
 
     /**
+     * Appelée sur la nouvelle antenne lors d'un handoff :
+     * elle délègue au GestionnaireReseau pour mettre à jour la connexion.
+     *
+     * @param numeroConnexion numéro de la connexion à mettre à jour
+     * @param ancienne antenne à remplacer
+     */
+    public void mettreAJourConnexion(int numeroConnexion, Antenne ancienne){
+        GestionnaireReseau.getInstance().mettreAJourConnexion(numeroConnexion, ancienne, this);
+    }
+
+    /**
      * Retire un cellulaire de la collection de l'antenne.
      * @param cellulaire le cellulaire à retirer
      */
@@ -76,32 +89,56 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
 
     @Override
     public int appeler(String numeroAppele, String numeroAppelant, Antenne antenne) {
-        return 0;
+
+        GestionnaireReseau gestionnaireReseau = GestionnaireReseau.getInstance();
+
+        int idConnexion = gestionnaireReseau.relayerAppel(this, numeroAppele, numeroAppelant);
+
+        return idConnexion;
     }
 
     @Override
     public Cellulaire repondre(String numeroAppele, String numeroAppelant, int numeroConnexion) {
+
+        for (Cellulaire cellulaire : tdaCellulaire) {
+
+            if (cellulaire.comparerNumero(numeroAppele)) {
+
+                cellulaire.repondre(numeroAppele, numeroAppelant, numeroConnexion);
+                return cellulaire;
+            }
+        }
         return null;
     }
 
     @Override
     public void finAppelLocal(String numeroAppele, int numeroConnexion) {
-
+        gestionnaireReseau.relayerFinAppel(numeroConnexion);
     }
 
     @Override
     public void finAppelDistant(String numeroAppele, int numeroConnexion) {
-
+        for (Cellulaire cellulaire : tdaCellulaire) {
+            if (cellulaire.getNumeroConnexion() == numeroConnexion) {
+                cellulaire.finAppelDistant(numeroAppele, numeroConnexion);
+                break;
+            }
+        }
     }
 
     @Override
     public void envoyer(Message message, int numeroConnexion) {
-
+        GestionnaireReseau.relayerMessage(message,numeroConnexion);
     }
 
     @Override
     public void recevoir(Message message) {
-
+        for (Cellulaire cellulaire : tdaCellulaire) {
+            if (cellulaire.comparerNumero(message.getNumeroDestination())) {
+                cellulaire.recevoir(message);
+                break;
+            }
+        }
     }
 
 
