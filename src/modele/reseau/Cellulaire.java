@@ -1,9 +1,11 @@
 package modele.reseau;
 
 import modele.communication.Message;
+import modele.gestionnaires.GestionnaireScenario;
 import modele.physique.ObjetMobile;
 import modele.physique.Position;
 
+import javax.print.attribute.standard.Destination;
 import java.util.Random;
 
 /**
@@ -98,22 +100,47 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
 
         this.seDeplacer();
 
-        //Trouver l'antenne la plus proche via le gestionnaire réseau
+
         Antenne antenneProche = gestionnaireReseau.getAntenneProche(this.position);
-
-        //Changement d'antenne si nécessaire
         if (antenneProche != null && antenneProche != this.antenneConnecte) {
-
             if (this.antenneConnecte != null) {
                 this.antenneConnecte.retirerCellulaire(this);
             }
-
             antenneProche.ajouterCellulaire(this);
+
+
+            if (this.estConnecte()) {
+                antenneProche.mettreAJourConnexion(this.numeroConnexion, this.antenneConnecte);
+            }
+
             this.antenneConnecte = antenneProche;
         }
 
-        // Ici tu pourras ajouter plus tard logique d'appels/messages
+
+        if (this.estConnecte()) {
+
+            if (random.nextDouble() < PROB_ENVOI_MSG) {
+                String texte = GestionnaireScenario.obtenirMessage(this.numeroLocal);
+                if (texte != null) {
+                    Message msg = new Message(this.numeroConnecte, texte);
+                    envoyer(msg, this.numeroConnexion);
+                }
+            }
+            else if (random.nextDouble() < PROB_DECONNEXION) {
+                finAppelLocal(this.numeroConnecte, this.numeroConnexion);
+                System.out.println(this.numeroLocal + " se déconnecte.");
+            }
+        }
+        else if (random.nextDouble() < PROB_APPELER) {
+            String numeroAlea;
+            do {
+                numeroAlea = GestionnaireScenario.obtenirNumeroStandardAlea("2");
+            } while (numeroAlea.equals(this.numeroLocal));
+
+            appeler(numeroAlea, this.numeroLocal, antenneProche);
+        }
     }
+
 
 
     /**
@@ -127,31 +154,95 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
 
     @Override
     public int appeler(String numeroAppele, String numeroAppelant, Antenne antenne) {
-        return 0;
+        if(antenne == null){
+            return NON_CONNECTE;
+        }
+
+        int numeroConnexion = antenne.appeler(numeroAppele,numeroAppelant, antenne);
+
+        if(numeroConnexion != NON_CONNECTE){
+            this.numeroConnecte = numeroAppele;
+            this.numeroConnexion = numeroConnexion;
+
+            String texte = GestionnaireScenario.obtenirMessage(this.numeroLocal);
+            Message nouveauMessage = null;
+
+            if(texte != null && this.antenneConnecte != null){
+                nouveauMessage = new Message(numeroAppele, texte);
+
+                System.out.println("==================================Debut=============================================");
+                System.out.println("Connexion entre deux cellulaires");
+                System.out.println("Cellulaire : " + numeroAppelant + " - Message envoye : "+ nouveauMessage.getMessage() + " Destination " + nouveauMessage.getNumeroDestination());
+                System.out.print("Cellulaire : " + numeroAppele + " - Message recu : ");
+                antenneConnecte.envoyer(nouveauMessage, this.numeroConnexion);
+                System.out.println("===================================Fin==============================================");
+            }
+
+            return numeroConnexion;
+        }
+
+        return NON_CONNECTE;
     }
 
     @Override
     public Cellulaire repondre(String numeroAppele, String numeroAppelant, int numeroConnexion) {
+        if(this.numeroConnexion == NON_CONNECTE){
+            this.numeroConnecte = numeroAppelant;
+            this.numeroConnexion = numeroConnexion;
+            return this;
+        }
         return null;
     }
 
     @Override
     public void finAppelLocal(String numeroAppele, int numeroConnexion) {
+        if (this.numeroConnexion != numeroConnexion) return;
 
+        // Prévenir l'antenne que l'appel se termine
+        if (this.antenneConnecte != null) {
+            this.antenneConnecte.finAppelLocal(this.numeroLocal, numeroConnexion);
+        }
+
+        // Réinitialiser la connexion localement
+        this.numeroConnexion = NON_CONNECTE;
+        this.numeroConnecte = null;
     }
 
     @Override
     public void finAppelDistant(String numeroAppele, int numeroConnexion) {
+        if (this.numeroConnexion != numeroConnexion) return;
 
+        // Réinitialiser la connexion localement
+        this.numeroConnexion = NON_CONNECTE;
+        this.numeroConnecte = null;
+
+        System.out.println("Appel terminé pour le cellulaire " + this.numeroLocal);
     }
 
     @Override
     public void envoyer(Message message, int numeroConnexion) {
+        if(!estConnecte()){
+            return;
+        }
+
+        if(this.numeroConnexion != numeroConnexion){
+            return;
+        }
+
+        String texte = GestionnaireScenario.obtenirMessage(this.numeroLocal);
+
+
+        if(texte == null){
+            return;
+        }
+
+
+        Message nouveauMessage = new Message(this.numeroConnecte,texte);
 
     }
 
     @Override
     public void recevoir(Message message) {
-
+        System.out.println(message.getMessage());
     }
 }

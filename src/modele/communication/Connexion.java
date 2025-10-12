@@ -38,6 +38,24 @@ public class Connexion {
     public int getNumeroConnexion() {
         return numeroConnexion;
     }
+    public Antenne getAntenneDestination() {
+        return antennes[1];
+    }
+    /**
+     * Remplace une ancienne antenne par une nouvelle dans la connexion.
+     *
+     * @param antenneAncienne l'ancienne antenne connectée
+     * @param antenneNouvelle la nouvelle antenne à connecter
+     */
+    public void mettreAJourAntenne(Antenne antenneAncienne, Antenne antenneNouvelle){
+        for (int i = 0; i < NB_ANTENNES; i++) {
+            if (antennes[i] == antenneAncienne) {
+                antennes[i] = antenneNouvelle;
+                return;
+            }
+        }
+
+    }
 
     /**
      * Vérifie si l'objet courant est égal à un autre objet donné.
