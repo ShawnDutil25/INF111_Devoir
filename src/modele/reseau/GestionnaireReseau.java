@@ -20,10 +20,12 @@ import modele.gestionnaires.GestionnaireScenario;
 import modele.physique.Carte;
 import modele.physique.Position;
 import observer.MonObservable;
+import tda.TDAStatique;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+
+
 
 public class GestionnaireReseau extends MonObservable implements Runnable {
 
@@ -43,7 +45,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	private Random random = new Random();
 	private ArrayList<Antenne> antennes = new ArrayList<>();
 	private ArrayList<Cellulaire> cellulaires = new ArrayList<>();
-	private static List<Connexion> listOrdonne = new ArrayList<>();
+	private static TDAStatique<Connexion> listOrdonne = new TDAStatique<>();
 	private int compteurConnexion = 0;
 
 	/**
@@ -65,8 +67,6 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	/**
 	 * Crée et ajoute les antennes dans la simulation.
 	 * Positionne chaque antenne aléatoirement.
-	 * @author Shawn Dutil
-	 * @version Automne 2025
 	 */
 	private void creeAntennes(){
 		for (int i = 0; i < NB_ANTENNES; i++) {
@@ -95,8 +95,8 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	 * Remplace la référence 'ancienne' par 'nouvelle' dans la Connexion correspondante.
 	 *
 	 * @param numeroConnexion numéro de la connexion à mettre à jour
-	 * @param ancienneAntenne       référence à l'ancienne antenne
-	 * @param nouvelleAntenne       référence à la nouvelle antenne
+	 * @param ancienneAntenne référence à l'ancienne antenne
+	 * @param nouvelleAntenne référence à la nouvelle antenne
 	 */
 	public void mettreAJourConnexion(int numeroConnexion, Antenne ancienneAntenne, Antenne nouvelleAntenne){
 
@@ -110,6 +110,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 
 	/**
 	 * Retourne l'antenne la plus proche d'une position donnée.
+	 *
 	 * @param position position du cellulaire
 	 * @return antenne la plus proche
 	 */
@@ -133,22 +134,20 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	 * Recherche une connexion dans la liste ordonnée par numéro de connexion.
 	 * Utilise la recherche binaire pour que sa soit plus rapide.
 	 * Insipiration de ce vidéo documentative : https://www.youtube.com/watch?v=gsaQRO0cU7Q
-	 * @author Shawn Dutil
-	 * @version Automne 2025
 	 *
 	 * @param numeroConnexion numéro de la connexion recherchée
 	 * @return la connexion correspondante ou null si non trouvée
 	 */
 	private static Connexion getConnexion(int numeroConnexion) {
 		int indiceDebut = 0;
-		int indiceFin = listOrdonne.size() -1;
+		int indiceFin = listOrdonne.getNbElements() -1;
 
 		while(indiceDebut <= indiceFin){
 			int indiceMilieu = (indiceDebut + indiceFin) / 2;
 
-			if(listOrdonne.get(indiceMilieu).getNumeroConnexion() == numeroConnexion){
-				return listOrdonne.get(indiceMilieu);
-			} else if (listOrdonne.get(indiceMilieu).getNumeroConnexion() < numeroConnexion) {
+			if(listOrdonne.getElement(indiceMilieu).getNumeroConnexion() == numeroConnexion){
+				return listOrdonne.getElement(indiceMilieu);
+			} else if (listOrdonne.getElement(indiceMilieu).getNumeroConnexion() < numeroConnexion) {
 				indiceDebut = indiceMilieu + 1;
 			} else {
 				indiceFin = indiceMilieu - 1;
@@ -160,8 +159,6 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	/**
 	 * Insère une connexion dans la liste ordonnée en conservant l'ordre croissant
 	 * selon le numéro de connexion.
-	 * @author Shawn Dutil
-	 * @version Automne 2025
 	 *
 	 * @param connexion connexion à insérer
 	 */
@@ -171,14 +168,14 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 
 		while (true) {
 			// Si on est arrivé à la fin de la liste, insérer à la fin
-			if (compteur >= listOrdonne.size()) {
-				listOrdonne.add(connexion);
+			if (compteur >= listOrdonne.getNbElements()) {
+				listOrdonne.ajouter(connexion);
 				break;
 			}
 
 			// Si le numéro actuel est plus grand ou égal, on insère ici
-			if (listOrdonne.get(compteur).getNumeroConnexion() >= connexion.getNumeroConnexion()) {
-				listOrdonne.add(compteur, connexion);
+			if (listOrdonne.getElement(compteur).getNumeroConnexion() >= connexion.getNumeroConnexion()) {
+				listOrdonne.ajouterParIndice(compteur, connexion);
 				break;
 			}
 
@@ -188,13 +185,14 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	/**
 	 * Relaye la demande d’appel à travers toutes les antennes du réseau.
 	 * Si une antenne trouve le cellulaire destinataire, une Connexion est créée.
+	 *
 	 * @param antenneSource antenne de l’appelant
 	 * @param numeroDestination numéro du cellulaire appelé
 	 * @param numeroAppelant numéro du cellulaire appelant
 	 * @return un identifiant de connexion (>0) si succès, CODE_NON_CONNECTE sinon
 	 */
 	public int relayerAppel(Antenne antenneSource, String numeroDestination, String numeroAppelant) {
-		int numeroConnexion = ++compteurConnexion; // génère un identifiant unique (>0)
+		int numeroConnexion = ++compteurConnexion;
 
 
 		for (Antenne antenne : antennes) {
@@ -209,14 +207,20 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 		}
 		return CODE_NON_CONNECTE;
 	}
-
+	/**
+	 * Relaye un message à travers le réseau vers l'antenne de destination associée à une connexion.
+	 * Cette méthode récupère la connexion correspondant au numéro fourni. Si la connexion existe,
+	 * elle obtient l'antenne de destination et lui transmet le message.
+	 *
+	 * @param message le message à relayer à travers le réseau
+	 * @param numeroConnexion le numéro unique identifiant la connexion en cours
+	 */
 	public static void relayerMessage(Message message, int numeroConnexion) {
 
 		Connexion connexion = getConnexion(numeroConnexion);
 		if (connexion == null) {
 			return;
 		}
-
 
 		Antenne antenneDestination = connexion.getAntenneDestination();
 		if (antenneDestination == null) {
@@ -227,31 +231,44 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 		antenneDestination.recevoir(message);
 	}
 
-	public void relayerFinAppel(int numeroConnexion) {
-		// Cherche la connexion existante
+	/**
+	 * Relaye la fin d’un appel à travers le réseau et supprime la connexion associée.
+	 * Cette méthode récupère la connexion à partir du numéro fourni. Si elle existe,
+	 * elle notifie l’antenne de destination,puis retire la connexion de la liste ordonnée
+	 * des connexions actives.
+	 *
+	 * @param numeroAppele le numéro à raccrocher
+	 * @param numeroConnexion le numéro unique de la connexion à terminer
+	 */
+	public void relayerFinAppel(String numeroAppele,int numeroConnexion) {
+
 		Connexion connexion = getConnexion(numeroConnexion);
 		if (connexion == null) return;
 
-		// Prévenir l’antenne distante que l’appel est terminé
+
 		Antenne antenneDest = connexion.getAntenneDestination();
+
 		if (antenneDest != null) {
-			antenneDest.finAppelDistant("", numeroConnexion);
+			antenneDest.finAppelDistant(numeroAppele, numeroConnexion);
 		}
 
-		// Supprimer la connexion de la liste
-		listOrdonne.remove(connexion);
+		if(listOrdonne.estVide()){
+			throw new ArrayIndexOutOfBoundsException("[GestionnaireReseau]-[relayerFinAppel] On ne peut pas retirer d'une liste vide.");
+		}
+
+
+		listOrdonne.retirer(connexion);
 	}
 
-
-
-
 	/**
+	 * Obtient le tableau d'antennes.
 	 * @return la liste des antennes
 	 * */
 	public ArrayList<Antenne> getAntennes() {
 		return antennes;
 	}
 	/**
+	 * Obtient la liste des cellulaires
 	 * @return la liste des cellulaires
 	 * */
 	public ArrayList<Cellulaire> getCellulaires() {
@@ -262,7 +279,6 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	 */
 	@Override
 	public void run() {
-
 
 		creeAntennes();
 		creeCellulaires();

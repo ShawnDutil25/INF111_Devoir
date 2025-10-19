@@ -2,6 +2,8 @@ package modele.physique;
 
 import java.util.Random;
 
+import static org.junit.Assert.assertNotEquals;
+
 /**
  * Classe abstraite représentant un objet mobile dans la carte.
  *
@@ -21,7 +23,6 @@ public abstract class ObjetMobile extends ObjetPhysique {
 
     /**
      * Constructeur de l'objet mobile.
-     *
      * La direction initiale est fixée à 0.
      *
      * @param position position initiale de l'objet
@@ -52,5 +53,23 @@ public abstract class ObjetMobile extends ObjetPhysique {
         position.setPositionY(posY);
 
         Carte.ajusterPosition(position);
+    }
+
+    /**
+     * Routine de test intégrée pour ObjetMobile
+     */
+    public static void run(){
+
+        System.out.println(Thread.currentThread().getName());
+
+        Position position = new Position(Carte.genererPositionAleatoire().getPositionX(), Carte.genererPositionAleatoire().getPositionY());
+
+        ObjetMobile mobile = new ObjetMobile(position,200,3){};
+
+        System.out.println("Position initiale : " + mobile.getPosition());
+
+        mobile.seDeplacer();
+
+        System.out.println("Position après déplacement : " + mobile.getPosition());
     }
 }

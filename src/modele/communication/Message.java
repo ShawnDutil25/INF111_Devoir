@@ -9,8 +9,6 @@ package modele.communication;
  */
 public class Message {
 
-
-
     private String numeroDestination;
     private String message;
 
@@ -27,7 +25,7 @@ public class Message {
     }
 
     /**
-     * Retourne le contenu textuel du message.
+     * Obtient le contenu textuel du message.
      *
      * @return le message sous forme de chaîne de caractères
      */
@@ -37,7 +35,7 @@ public class Message {
 
 
     /**
-     * Retourne le numéro de téléphone de destination.
+     * Obtient le numéro de téléphone de destination.
      *
      * @return le numéro de destination sous forme de chaîne
      */

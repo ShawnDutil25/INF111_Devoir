@@ -13,7 +13,6 @@ import modele.reseau.Antenne;
 public class Connexion {
 
     private static final int NB_ANTENNES =2;
-
     private int numeroConnexion;
     private Antenne[] antennes = new Antenne[NB_ANTENNES];
 
@@ -31,13 +30,18 @@ public class Connexion {
     }
 
     /**
-     * Retourne le numéro de la connexion.
+     * Obtient le numéro de la connexion.
      *
      * @return le numéro unique de la connexion
      */
     public int getNumeroConnexion() {
         return numeroConnexion;
     }
+    /**
+     * Obtient l'antenne de destination.
+     *
+     * @return le numéro unique de la connexion
+     */
     public Antenne getAntenneDestination() {
         return antennes[1];
     }
@@ -70,13 +74,9 @@ public class Connexion {
         if(this == obj){
             return true;
         }
-
-        // Vérifie que l’objet n’est pas null et du bon type
-        if (!(obj instanceof Connexion)) {
+        if (!(obj instanceof Connexion connexion)) {
             return false;
         }
-
-         Connexion connexion = (Connexion) obj;
 
         return this.numeroConnexion == connexion.numeroConnexion;
     }

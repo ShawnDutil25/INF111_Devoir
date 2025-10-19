@@ -1,11 +1,11 @@
 package modele.gestionnaires;
 
 /**
- * Le gestionnaire de scénario est un module utilitaire gérant:
- * 	* la création de numéro de téléphone
+ * Le gestionnaire de scï¿½nario est un module utilitaire gï¿½rant:
+ * 	* la crï¿½ation de numï¿½ro de tï¿½lï¿½phone
  *  * les messages
  *  
- *  Les fonctionnalités sont offertes pour les numéros normales et les numéros
+ *  Les fonctionnalitï¿½s sont offertes pour les numï¿½ros normales et les numï¿½ros
  *  de criminels.
  *  
  *  @author Fred Simard | ETS
@@ -15,14 +15,11 @@ package modele.gestionnaires;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-import modele.physique.Carte;
-import modele.reseau.Antenne;
 import modele.reseau.GestionnaireReseau;
-import tda.FileSChainee;
+import tda.FileChainee;
 
 public class GestionnaireScenario {
 
@@ -30,7 +27,7 @@ public class GestionnaireScenario {
 	public static final String PREFIX = "514-";
 	
 	GestionnaireReseau reseau = GestionnaireReseau.getInstance();
-	FileSChainee<String> file = new FileSChainee<String>();
+	FileChainee<String> file = new FileChainee<String>();
 	ArrayList<String> numeroCriminel = new ArrayList<String>(GestionnaireReseau.NB_CRIMINELS);
 	ArrayList<String> numeroStandard = new ArrayList<String>(GestionnaireReseau.NB_CELLULAIRES);
 
@@ -44,7 +41,7 @@ public class GestionnaireScenario {
 	}
 	
 	/**
-	 * méthode qui charge le fichier de conversation
+	 * mï¿½thode qui charge le fichier de conversation
 	 */
 	private void chargementDuFichier() {
 		
@@ -60,8 +57,8 @@ public class GestionnaireScenario {
 	}
 	
 	/**
-	 * Méthode utilitaire pour générer une chaîne de caractères aléatoire
-	 * @return String aléatoire
+	 * Mï¿½thode utilitaire pour gï¿½nï¿½rer une chaï¿½ne de caractï¿½res alï¿½atoire
+	 * @return String alï¿½atoire
 	 * @ref: https://www.baeldung.com/java-random-string
 	 */
 	private static String generatingRandomAlphabeticString() {
@@ -78,11 +75,11 @@ public class GestionnaireScenario {
 	}
 	
 	/**
-	 * Méthode retournant un message. Le message renvoyé dépend de 
-	 * si le numéro est standard ou criminel. Si criminel, le message est tiré
-	 * du scénario. Si standard, chaine de caractère aléatoire
-	 * @param numero utilisé pour envoyer le message
-	 * @return le message à envoyer
+	 * Mï¿½thode retournant un message. Le message renvoyï¿½ dï¿½pend de 
+	 * si le numï¿½ro est standard ou criminel. Si criminel, le message est tirï¿½
+	 * du scï¿½nario. Si standard, chaine de caractï¿½re alï¿½atoire
+	 * @param numero utilisï¿½ pour envoyer le message
+	 * @return le message ï¿½ envoyer
 	 */
 	public static String obtenirMessage(String numero) {
 		
@@ -100,11 +97,11 @@ public class GestionnaireScenario {
 	}
 
 	/**
-	 * Méthode qui retourne un numéro choisi aléatoirement parmis la
-	 * liste des numéros criminels, à l'exception de celui reçu en
-	 * paramètre
-	 * @param exclus le numéro a exclure des possibilités
-	 * @return le numéro appartenant aux numéros criminels
+	 * Mï¿½thode qui retourne un numï¿½ro choisi alï¿½atoirement parmis la
+	 * liste des numï¿½ros criminels, ï¿½ l'exception de celui reï¿½u en
+	 * paramï¿½tre
+	 * @param exclus le numï¿½ro a exclure des possibilitï¿½s
+	 * @return le numï¿½ro appartenant aux numï¿½ros criminels
 	 */
 	public static String obtenirNumeroCriminelAlea(String exclus) {
 		int index = instance.rand.nextInt(instance.numeroCriminel.size());
@@ -118,11 +115,11 @@ public class GestionnaireScenario {
 	}
 
 	/**
-	 * Méthode qui retourne un numéro choisi aléatoirement parmis la
-	 * liste des numéros standard, à l'exception de celui reçu en
-	 * paramètre
-	 * @param exclus le numéro a exclure des possibilités
-	 * @return le numéro appartenant aux numéros standards
+	 * Mï¿½thode qui retourne un numï¿½ro choisi alï¿½atoirement parmis la
+	 * liste des numï¿½ros standard, ï¿½ l'exception de celui reï¿½u en
+	 * paramï¿½tre
+	 * @param exclus le numï¿½ro a exclure des possibilitï¿½s
+	 * @return le numï¿½ro appartenant aux numï¿½ros standards
 	 */
 	public static String obtenirNumeroStandardAlea(String exclus) {
 		int index = instance.rand.nextInt(instance.numeroStandard.size());
@@ -136,9 +133,9 @@ public class GestionnaireScenario {
 	}
 
 	/**
-	 * Méthode qui retourne un numéro de téléphone aléatoire
-	 * après l'avoir ajouté à la liste des numéros criminels
-	 * @return le numéro sous forme the String
+	 * Mï¿½thode qui retourne un numï¿½ro de tï¿½lï¿½phone alï¿½atoire
+	 * aprï¿½s l'avoir ajoutï¿½ ï¿½ la liste des numï¿½ros criminels
+	 * @return le numï¿½ro sous forme the String
 	 */
 	public static String obtenirNouveauNumeroCriminel() {
 		String numero = obtenirNouveauNumeroAlea();
@@ -147,9 +144,9 @@ public class GestionnaireScenario {
 	}
 
 	/**
-	 * Méthode qui retourne un numéro de téléphone aléatoire
-	 * après l'avoir ajouté à la liste des numéros standards
-	 * @return le numéro sous forme the String
+	 * Mï¿½thode qui retourne un numï¿½ro de tï¿½lï¿½phone alï¿½atoire
+	 * aprï¿½s l'avoir ajoutï¿½ ï¿½ la liste des numï¿½ros standards
+	 * @return le numï¿½ro sous forme the String
 	 */
 	public static String obtenirNouveauNumeroStandard() {
 		String numero = obtenirNouveauNumeroAlea();
@@ -158,9 +155,9 @@ public class GestionnaireScenario {
 	}
 
 	/**
-	 * Méthode qui construit un numéro de téléphone aléatoire
-	 * avec un préfix constant, tel que PPP-XXX-YYYY
-	 * @return le numéro sous forme the String
+	 * Mï¿½thode qui construit un numï¿½ro de tï¿½lï¿½phone alï¿½atoire
+	 * avec un prï¿½fix constant, tel que PPP-XXX-YYYY
+	 * @return le numï¿½ro sous forme the String
 	 */
 	private static String obtenirNouveauNumeroAlea() {
 		

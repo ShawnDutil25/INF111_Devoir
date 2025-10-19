@@ -92,17 +92,15 @@ public class PanneauPrincipal extends JPanel implements MonObserver{
 
 			// si le cellulaire est connect�, choisi sa couleur � partir du num�ro de connexion
 			if(cellulaire.estConnecte()) {
-				double test = cellulaire.getNumeroConnexion()/(double)Integer.MAX_VALUE;
-				test *= 3;
-				if(test<=1) {
-					g.setColor(new Color((float)test%1,0.0f,0.0f));
-				}else if(test<=2) {
-					test -= 1.0;
-					g.setColor(new Color(0.0f,(float)test%1,0.0f));
-				}else {
-					test -= 2.0;
-					g.setColor(new Color((float)test%1,0.0f,(float)test%1));
-				}
+
+				int numeroConnexion = Math.abs(cellulaire.getNumeroConnexion());
+
+				// Génère une teinte unique et bien répartie
+				float hue = ((numeroConnexion * 53) % 360) / 360f;
+
+				// Crée une couleur selon le hue (numeroConnexion).
+				Color couleur = Color.getHSBColor(hue, 0.85f, 0.95f);
+				g.setColor(couleur);
 			}else {
 				g.setColor(Color.BLUE);
 			}
