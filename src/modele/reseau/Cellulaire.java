@@ -4,8 +4,6 @@ import modele.communication.Message;
 import modele.gestionnaires.GestionnaireScenario;
 import modele.physique.ObjetMobile;
 import modele.physique.Position;
-
-import javax.print.attribute.standard.Destination;
 import java.util.Random;
 
 /**
@@ -29,26 +27,16 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
     private String numeroLocal;
     private int numeroConnexion = NON_CONNECTE;
     private String numeroConnecte = null;
-
-    public Antenne getAntenneConnecte() {
-        return antenneConnecte;
-    }
-
-    public void setAntenneConnecte(Antenne antenneConnecte) {
-        this.antenneConnecte = antenneConnecte;
-    }
-
     public Antenne antenneConnecte;
     private Random random = new Random();
     private GestionnaireReseau gestionnaireReseau = GestionnaireReseau.getInstance();
-
 
     /**
      * Constructeur de l'objet mobile.
      * La direction initiale est fixée à 0.
      *
-     * @param position          position initiale de l'objet
-     * @param vitesse           vitesse de déplacement en pixels par itération
+     * @param position position initiale de l'objet
+     * @param vitesse vitesse de déplacement en pixels par itération
      * @param deviationStandard déviation standard pour la direction en radian
      */
     public Cellulaire(String numeroLocal, Position position, double vitesse, double deviationStandard) {
@@ -61,7 +49,6 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
             this.antenneConnecte.ajouterCellulaire(this);
         }
     }
-
 
     /**
      * Vérifie si le cellulaire est actuellement connecté.
@@ -81,22 +68,9 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
     }
 
     /**
-     * Retourne le numéro de connexion actuel.
-     * @return le numéro de connexion
+     * Effectue un tour de simulation pour ce cellulaire.
      */
-    public int getNumeroConnexion() {
-        return numeroConnexion;
-    }
-
-    /**
-     * Retourne le numéro local du cellulaire.
-     * @return le numéro local
-     */
-    public String getNumeroLocal() {
-        return numeroLocal;
-    }
-
-    public void effectuerTour() {
+    public void effectuerTour(){
 
         this.seDeplacer();
 
@@ -127,8 +101,8 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
                 }
             }
             else if (random.nextDouble() < PROB_DECONNEXION) {
+                System.out.printf("Cellulaire %s est deconnecter avec le numero de connexion %s \n",this.numeroLocal,this.numeroConnexion);
                 finAppelLocal(this.numeroConnecte, this.numeroConnexion);
-                System.out.println(this.numeroLocal + " se déconnecte.");
             }
         }
         else if (random.nextDouble() < PROB_APPELER) {
@@ -140,8 +114,6 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
             appeler(numeroAlea, this.numeroLocal, antenneProche);
         }
     }
-
-
 
     /**
      * Retourne une représentation textuelle du cellulaire.
@@ -161,8 +133,9 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
         int numeroConnexion = antenne.appeler(numeroAppele,numeroAppelant, antenne);
 
         if(numeroConnexion != NON_CONNECTE){
-            this.numeroConnecte = numeroAppele;
-            this.numeroConnexion = numeroConnexion;
+            this.setNumeroConnecte(numeroAppele);
+            this.setNumeroConnexion(numeroConnexion);
+
 
             String texte = GestionnaireScenario.obtenirMessage(this.numeroLocal);
             Message nouveauMessage = null;
@@ -172,6 +145,7 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
 
                 System.out.println("==================================Debut=============================================");
                 System.out.println("Connexion entre deux cellulaires");
+                System.out.println("Numéro de connexion : " + this.numeroConnexion);
                 System.out.println("Cellulaire : " + numeroAppelant + " - Message envoye : "+ nouveauMessage.getMessage() + " Destination " + nouveauMessage.getNumeroDestination());
                 System.out.print("Cellulaire : " + numeroAppele + " - Message recu : ");
                 antenneConnecte.envoyer(nouveauMessage, this.numeroConnexion);
@@ -198,12 +172,12 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
     public void finAppelLocal(String numeroAppele, int numeroConnexion) {
         if (this.numeroConnexion != numeroConnexion) return;
 
-        // Prévenir l'antenne que l'appel se termine
+
         if (this.antenneConnecte != null) {
             this.antenneConnecte.finAppelLocal(this.numeroLocal, numeroConnexion);
         }
 
-        // Réinitialiser la connexion localement
+
         this.numeroConnexion = NON_CONNECTE;
         this.numeroConnecte = null;
     }
@@ -212,11 +186,8 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
     public void finAppelDistant(String numeroAppele, int numeroConnexion) {
         if (this.numeroConnexion != numeroConnexion) return;
 
-        // Réinitialiser la connexion localement
         this.numeroConnexion = NON_CONNECTE;
         this.numeroConnecte = null;
-
-        System.out.println("Appel terminé pour le cellulaire " + this.numeroLocal);
     }
 
     @Override
@@ -244,5 +215,34 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
     @Override
     public void recevoir(Message message) {
         System.out.println(message.getMessage());
+    }
+
+    /**
+     * Retourne le numéro de connexion actuel.
+     * @return le numéro de connexion
+     */
+    public int getNumeroConnexion() {
+        return numeroConnexion;
+    }
+
+    /**
+     * Retourne le numéro local du cellulaire.
+     * @return le numéro local
+     */
+    public String getNumeroLocal() {
+        return numeroLocal;
+    }
+    /**
+     * Définit le numéro de connexion (utilisé par le gestionnaire/antenne).
+     */
+    public void setNumeroConnexion(int numeroConnexion) {
+        this.numeroConnexion = numeroConnexion;
+    }
+
+    /**
+     * Définit le numéro du correspondant (numéro connecté).
+     */
+    public void setNumeroConnecte(String numeroConnecte) {
+        this.numeroConnecte = numeroConnecte;
     }
 }

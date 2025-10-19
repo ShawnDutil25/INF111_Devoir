@@ -3,12 +3,7 @@ package modele.reseau;
 import modele.communication.Message;
 import modele.physique.ObjetPhysique;
 import modele.physique.Position;
-
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import tda.TDAStatique;
 /**
  * Représente une antenne du réseau cellulaire.
  *
@@ -23,13 +18,10 @@ import java.util.List;
 public class Antenne extends ObjetPhysique implements UniteCellulaire {
 
     private final GestionnaireReseau gestionnaireReseau = GestionnaireReseau.getInstance();
-    private static ArrayList<Cellulaire> tdaCellulaire = new ArrayList<>();
-    public static ArrayList<Cellulaire> getTdaCellulaire() {
-        return tdaCellulaire;
-    }
+    private final TDAStatique<Cellulaire> listeCellulaires = new TDAStatique<>();
+
     /**
      * Constructeur paramétré permettant d'initialiser la position de l'objet.
-     *
      * @param position la position initiale de l'objet physique.
      */
     public Antenne(Position position) {
@@ -52,9 +44,7 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
      * @param cellulaire le cellulaire à ajouter
      */
     public void ajouterCellulaire(Cellulaire cellulaire) {
-        if (!tdaCellulaire.contains(cellulaire)) {
-            tdaCellulaire.add(cellulaire);
-        }
+        listeCellulaires.ajouter(cellulaire);
     }
 
     /**
@@ -73,13 +63,15 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
      * @param cellulaire le cellulaire à retirer
      */
     public void retirerCellulaire(Cellulaire cellulaire) {
-        tdaCellulaire.remove(cellulaire);
+        if(listeCellulaires.estVide()){
+            throw new ArrayIndexOutOfBoundsException("[Antenne]-[retirerCellulaire] On ne peut pas retirer d'une liste vide.");
+        }
+        listeCellulaires.retirer(cellulaire);
     }
 
 
     /**
      * Retourne une représentation textuelle de l’antenne.
-     *
      * @return une chaîne contenant la position de l’antenne
      */
     @Override
@@ -92,15 +84,13 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
 
         GestionnaireReseau gestionnaireReseau = GestionnaireReseau.getInstance();
 
-        int idConnexion = gestionnaireReseau.relayerAppel(this, numeroAppele, numeroAppelant);
-
-        return idConnexion;
+        return gestionnaireReseau.relayerAppel(this, numeroAppele, numeroAppelant);
     }
 
     @Override
     public Cellulaire repondre(String numeroAppele, String numeroAppelant, int numeroConnexion) {
 
-        for (Cellulaire cellulaire : tdaCellulaire) {
+        for (Cellulaire cellulaire : listeCellulaires.getListeClone()) {
 
             if (cellulaire.comparerNumero(numeroAppele)) {
 
@@ -113,12 +103,12 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
 
     @Override
     public void finAppelLocal(String numeroAppele, int numeroConnexion) {
-        gestionnaireReseau.relayerFinAppel(numeroConnexion);
+        gestionnaireReseau.relayerFinAppel(numeroAppele, numeroConnexion);
     }
 
     @Override
     public void finAppelDistant(String numeroAppele, int numeroConnexion) {
-        for (Cellulaire cellulaire : tdaCellulaire) {
+        for (Cellulaire cellulaire : listeCellulaires.getListeClone()) {
             if (cellulaire.getNumeroConnexion() == numeroConnexion) {
                 cellulaire.finAppelDistant(numeroAppele, numeroConnexion);
                 break;
@@ -133,12 +123,59 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
 
     @Override
     public void recevoir(Message message) {
-        for (Cellulaire cellulaire : tdaCellulaire) {
+        for (Cellulaire cellulaire : listeCellulaires.getListeClone()) {
             if (cellulaire.comparerNumero(message.getNumeroDestination())) {
                 cellulaire.recevoir(message);
                 break;
             }
         }
+    }
+
+    /**
+     * s'exécute en continue pour simuler le système
+     */
+    public void run() {
+        System.out.println(Thread.currentThread().getName());
+
+        Cellulaire c1 = new Cellulaire("555-0001", new Position(10, 10), 0, 0);
+        Cellulaire c2 = new Cellulaire("555-0002", new Position(20, 20), 0, 0);
+
+        // Test ajout de cellulaires
+        System.out.println("Ajout du cellulaire1 et cellulaire2");
+        ajouterCellulaire(c1);
+        ajouterCellulaire(c2);
+        System.out.println("Nb cellulaires : " + listeCellulaires.getNbElements());
+
+        // Test les erreurs
+        // Affiche leur qui est supposer d'afficher
+        try {
+            ajouterCellulaire(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Exception attendue : " + e.getMessage());
+        }
+
+
+        System.out.println("Supprimer cellulaire1");
+        retirerCellulaire(c1);
+        System.out.println("Nb cellulaires après la suppression : " + listeCellulaires.getNbElements());
+
+        // Test les erreurs
+        // Affiche leur qui est supposer d'afficher
+        try {
+            retirerCellulaire(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Exception attendue : " + e.getMessage());
+        }
+
+        // Test de getElement
+        try {
+            Cellulaire test = listeCellulaires.getElement(0);
+            System.out.println("Cellulaire en indice 0 : " + test.getNumeroLocal());
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Exception getElement : " + e.getMessage());
+        }
+
+        System.out.println("--------");
     }
 
 

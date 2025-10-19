@@ -60,6 +60,25 @@ public final class Carte {
         }
     }
 
+    /**
+     * Routine de test intégrée pour Carte
+     */
+    public static void run() {
 
+        System.out.println(Thread.currentThread().getName());
+
+        Position p = genererPositionAleatoire();
+        System.out.println("Point généré : " + p);
+
+
+        p.setPositionX(p.getPositionX() + TAILLE_CARTE.getPositionX() + 50);
+        p.setPositionY(p.getPositionY() - 50);
+        System.out.println("Point déplacé hors carte : " + p);
+
+        ajusterPosition(p);
+
+        System.out.println("Point après ajustement : " + p);
+        System.out.println("------------");
+    }
 
 }
