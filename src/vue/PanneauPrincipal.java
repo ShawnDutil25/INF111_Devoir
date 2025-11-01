@@ -1,13 +1,13 @@
 package vue;
 /**
- * Panneau qui affiche l'état de la simulation.
- * 
- * Les antennes sont représentés par des cercles gris et les Cellulaire par des cercles bleus.
- * Lorsque deux cellulaires sont connectés, ils changent de couleur et prenne une couleur aléatoire
+ * Panneau qui affiche l'ï¿½tat de la simulation.
+ *
+ * Les antennes sont reprï¿½sentï¿½s par des cercles gris et les Cellulaire par des cercles bleus.
+ * Lorsque deux cellulaires sont connectï¿½s, ils changent de couleur et prenne une couleur alï¿½atoire
  * commune.
- * 
- * Le panneau se mets à jours suivant une notification du modèle (Observable)
- * 
+ *
+ * Le panneau se mets ï¿½ jours suivant une notification du modï¿½le (Observable)
+ *
  * @author Fred Simard
  * @version Hiver 2021
  */
@@ -30,109 +30,107 @@ public class PanneauPrincipal extends JPanel implements MonObserver{
 
 	private static int RAYON_ANTENNE = 20;
 	private static int RAYON_INDIVIDU = 10;
-	
+
 	Dimension taille;
 	GestionnaireReseau reseau = GestionnaireReseau.getInstance();
-	
+
 	/**
 	 * Constructeur
-	 * @param taille de la fenêtre
+	 * @param taille de la fenï¿½tre
 	 */
 	public PanneauPrincipal(Dimension taille) {
-		
-		this.taille = taille; 
+
+		this.taille = taille;
 		rafraichirDessin();
-		
+
 		reseau.attacherObserver(this);
-		
-	}
-	
-	/**
-	 * appelé pour mettre à jours le dessin
-	 */
-	private void rafraichirDessin(){
-		
-		validate();
-		repaint();		
 
 	}
-	
+
 	/**
-	 * méthode hérité qui dessine à la fenêtre
+	 * appelï¿½ pour mettre ï¿½ jours le dessin
+	 */
+	private void rafraichirDessin(){
+
+		validate();
+		repaint();
+
+	}
+
+	/**
+	 * mï¿½thode hï¿½ritï¿½ qui dessine ï¿½ la fenï¿½tre
 	 */
 	public void paintComponent(Graphics g) {
 
 		// convertie en engin graphique 2D
 		Graphics2D g2 = (Graphics2D) g;
-		
+
 		// appel au paint de base
 		super.paintComponent(g);
 		// efface l'Ã©cran
 		g2.clearRect(0, 0, taille.width, taille.height);
-		
+
 		dessineCellulaires(g2);
 		dessineAntennes(g2);
 
         //gets rid of the copy
         g2.dispose();
 	}
-	
+
 	/**
-	 * Dessine les cellulaires à l'écran
-	 * @param g référence à engin graphique
+	 * Dessine les cellulaires ï¿½ l'ï¿½cran
+	 * @param g rï¿½fï¿½rence ï¿½ engin graphique
 	 */
 	public void dessineCellulaires(Graphics2D g) {
-		
+
 		ArrayList<Cellulaire> cellulaires = reseau.getCellulaires();
-		
+
 		// dessine tous les cellulaires
 		for(Cellulaire cellulaire : cellulaires) {
-			
+
 			Position position = cellulaire.getPosition();
-			
-			// si le cellulaire est connecté, choisi sa couleur à partir du numéro de connexion
+
+			// si le cellulaire est connectï¿½, choisi sa couleur ï¿½ partir du numï¿½ro de connexion
 			if(cellulaire.estConnecte()) {
-				double test = cellulaire.getNumeroConnexion()/(double)Integer.MAX_VALUE;
-				test *= 3;
-				if(test<=1) {
-					g.setColor(new Color((float)test%1,0.0f,0.0f));
-				}else if(test<=2) {
-					test -= 1.0;
-					g.setColor(new Color(0.0f,(float)test%1,0.0f));
-				}else {
-					test -= 2.0;
-					g.setColor(new Color((float)test%1,0.0f,(float)test%1));
-				}
+
+				int numeroConnexion = Math.abs(cellulaire.getNumeroConnexion());
+
+				// GÃ©nÃ¨re une teinte unique et bien rÃ©partie
+				float hue = ((numeroConnexion * 53) % 360) / 360f;
+
+				// CrÃ©e une couleur selon le hue (numeroConnexion).
+				Color couleur = Color.getHSBColor(hue, 0.85f, 0.95f);
+				g.setColor(couleur);
 			}else {
 				g.setColor(Color.BLUE);
 			}
-			
-			g.fillOval((int)position.getX()-RAYON_INDIVIDU, (int)position.getY()-RAYON_INDIVIDU, 2*RAYON_INDIVIDU, 2*RAYON_INDIVIDU);	
-			
+
+			g.fillOval((int)position.getPositionX()-RAYON_INDIVIDU, (int)position.getPositionY()-RAYON_INDIVIDU, 2*RAYON_INDIVIDU, 2*RAYON_INDIVIDU);
+
 		}
-		
+
 	}
 
 	/**
-	 * Dessine les antennes à l'écran
-	 * @param g référence à engin graphique
+	 * Dessine les antennes ï¿½ l'ï¿½cran
+	 * @param g rï¿½fï¿½rence ï¿½ engin graphique
 	 */
 	public void dessineAntennes(Graphics2D g) {
 
 		ArrayList<Antenne> antennes = reseau.getAntennes();
-		
-		// dessine toutes les antennes selon les paramètres
+
+		// dessine toutes les antennes selon les paramï¿½tres
 		for(Antenne antenne : antennes) {
 
 			Position position = antenne.getPosition();
 			g.setColor(Color.DARK_GRAY);
-			g.fillOval((int)position.getX()-RAYON_ANTENNE, (int)position.getY()-RAYON_ANTENNE, 2*RAYON_ANTENNE, 2*RAYON_ANTENNE);	
+			g.fillOval((int)position.getPositionX()-RAYON_ANTENNE, (int)position.getPositionY()-RAYON_ANTENNE, 2*RAYON_ANTENNE, 2*RAYON_ANTENNE);
 		}
 	}
 
 	@Override
 	public void avertir() {
-		rafraichirDessin();		
+		rafraichirDessin();
 	}
-	
+
 }

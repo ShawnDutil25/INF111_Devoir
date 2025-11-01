@@ -1,8 +1,8 @@
 package vue;
 /**
- * Cadre simple, plein écran qui contient un panneau dessin.
+ * Cadre simple, plein ï¿½cran qui contient un panneau dessin.
  * 
- * Intègre la logique de confirmation de fermeture de fenêtre
+ * Intï¿½gre la logique de confirmation de fermeture de fenï¿½tre
  */
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -62,7 +62,7 @@ public class CadrePrincipal extends JFrame implements Runnable{
 
         // instancie notre panneau principal
 		panneauPrincipal = new PanneauPrincipal(tailleEcran);
-        
+
         // cette ligne remplace le JPanel existant dans le JFrame
         // par notre classe dÃ©finis
 		this.setContentPane(panneauPrincipal);
