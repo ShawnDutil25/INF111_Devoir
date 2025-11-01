@@ -23,9 +23,6 @@ import observer.MonObservable;
 import tda.TDAStatique;
 
 import java.util.ArrayList;
-import java.util.Random;
-
-
 
 public class GestionnaireReseau extends MonObservable implements Runnable {
 
@@ -42,7 +39,6 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	private boolean mondeEnVie = true;
 	private static GestionnaireReseau instance = new GestionnaireReseau();
 
-	private Random random = new Random();
 	private ArrayList<Antenne> antennes = new ArrayList<>();
 	private ArrayList<Cellulaire> cellulaires = new ArrayList<>();
 	private static TDAStatique<Connexion> listOrdonne = new TDAStatique<>();
@@ -79,8 +75,7 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	/**
 	 * Crée et ajoute les cellulaires dans la simulation.
 	 * Chaque cellulaire reçoit un numéro unique et une position aléatoire.
-	 * @author Shawn Dutil
-	 * @version Automne 2025
+	 *
 	 */
 	private void creeCellulaires(){
 		for (int i = 0; i < NB_CELLULAIRE; i++) {
@@ -216,19 +211,14 @@ public class GestionnaireReseau extends MonObservable implements Runnable {
 	 * @param numeroConnexion le numéro unique identifiant la connexion en cours
 	 */
 	public static void relayerMessage(Message message, int numeroConnexion) {
-
 		Connexion connexion = getConnexion(numeroConnexion);
-		if (connexion == null) {
+		if (connexion == null){
 			return;
 		}
-
 		Antenne antenneDestination = connexion.getAntenneDestination();
-		if (antenneDestination == null) {
-			System.out.println("Antenne destinataire non trouvée");
-			return;
+		if (antenneDestination != null) {
+			antenneDestination.recevoir(message, numeroConnexion);
 		}
-
-		antenneDestination.recevoir(message);
 	}
 
 	/**

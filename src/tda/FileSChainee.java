@@ -5,36 +5,35 @@ package tda;
  *
  * @param <S> le type des éléments stockés dans la file
  */
-public class FileChainee<S> {
+public class FileSChainee<S> {
 
 
     /**
      * Classe interne représentant un nœud de la file.
      *
-     * @param <S> le type de la valeur contenue dans le nœud
      */
-    public static class Noeud<S>{
-        String valeur;
-        Noeud<String> suivant;
+    protected class Noeud{
+        protected String valeur;
+        protected Noeud suivant;
 
         /**
          * Constructeur d'un nœud.
          *
          * @param valeur la valeur à stocker
          */
-        Noeud(String valeur){
+        public Noeud(String valeur){
             this.valeur = valeur;
             this.suivant = null;
         }
     }
 
-    private Noeud<String> debut = null;
-    private Noeud<String> fin = null;
+    private Noeud debut = null;
+    private Noeud fin = null;
 
     /**
      * Constructeur de la liste chainée
      */
-    public FileChainee(){
+    public FileSChainee(){
         this.debut = null;
         this.fin = null;
     }
@@ -45,15 +44,17 @@ public class FileChainee<S> {
      * @param element l'élément à ajouter
      */
     public void enfiler(String element){
-        Noeud<String> nouveau = new Noeud<>(element);
+        Noeud nouveau = new Noeud(element);
 
         if(fin == null){
+            fin = nouveau;
             debut = nouveau;
+        }else{
+            fin.suivant = nouveau;
             fin = nouveau;
         }
 
-        fin.suivant = nouveau;
-        fin = nouveau;
+
     }
 
     /**
@@ -69,7 +70,7 @@ public class FileChainee<S> {
         String valeur = debut.valeur;
         debut = debut.suivant;
 
-        if(estVide()){
+        if(debut == null){
             fin = null;
         }
 

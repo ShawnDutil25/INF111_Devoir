@@ -1,5 +1,4 @@
 package tda;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,4 +126,5 @@ public class TDAStatique<T> {
         }
         return listeElements.get(indice);
     }
+
 }
