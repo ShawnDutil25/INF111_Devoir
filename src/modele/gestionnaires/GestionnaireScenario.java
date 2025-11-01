@@ -19,7 +19,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 import modele.reseau.GestionnaireReseau;
-import tda.FileChainee;
+import tda.FileSChainee;
 
 public class GestionnaireScenario {
 
@@ -27,7 +27,7 @@ public class GestionnaireScenario {
 	public static final String PREFIX = "514-";
 	
 	GestionnaireReseau reseau = GestionnaireReseau.getInstance();
-	FileChainee<String> file = new FileChainee<String>();
+	FileSChainee<String> file = new FileSChainee<String>();
 	ArrayList<String> numeroCriminel = new ArrayList<String>(GestionnaireReseau.NB_CRIMINELS);
 	ArrayList<String> numeroStandard = new ArrayList<String>(GestionnaireReseau.NB_CELLULAIRES);
 

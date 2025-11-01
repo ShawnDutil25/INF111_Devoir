@@ -69,6 +69,7 @@ public interface UniteCellulaire {
      * Reçoit un message provenant d’une autre unité cellulaire.
      *
      * @param message le message reçu
+     * @param numeroConnexion le numero de connexion entre les deux cellulaires
      */
-    void recevoir(Message message);
+    void recevoir(Message message, int numeroConnexion);
 }

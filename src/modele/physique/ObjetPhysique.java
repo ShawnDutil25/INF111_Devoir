@@ -12,7 +12,6 @@ package modele.physique;
  */
 public abstract class ObjetPhysique {
 
-    // Position « protected », car on veut empêcher l'acces directe depuis l'extérieur.
     protected Position position;
 
     /**

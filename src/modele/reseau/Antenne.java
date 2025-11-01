@@ -4,6 +4,7 @@ import modele.communication.Message;
 import modele.physique.ObjetPhysique;
 import modele.physique.Position;
 import tda.TDAStatique;
+
 /**
  * Représente une antenne du réseau cellulaire.
  *
@@ -44,6 +45,15 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
      * @param cellulaire le cellulaire à ajouter
      */
     public void ajouterCellulaire(Cellulaire cellulaire) {
+        if (cellulaire == null) throw new IllegalArgumentException("[Antenne]-[ajouterCellulaire] le cellulaire ajouter est null.");
+
+        // Eviter les doublons
+        for (Cellulaire c : listeCellulaires.getListeClone()) {
+            if (c.comparerNumero(cellulaire.getNumeroLocal())) {
+                return;
+            }
+        }
+
         listeCellulaires.ajouter(cellulaire);
     }
 
@@ -122,10 +132,12 @@ public class Antenne extends ObjetPhysique implements UniteCellulaire {
     }
 
     @Override
-    public void recevoir(Message message) {
+    public void recevoir(Message message, int numeroConnexion) {
         for (Cellulaire cellulaire : listeCellulaires.getListeClone()) {
-            if (cellulaire.comparerNumero(message.getNumeroDestination())) {
-                cellulaire.recevoir(message);
+
+            if (cellulaire.getNumeroConnexion() == numeroConnexion) {
+
+                cellulaire.recevoir(message,numeroConnexion);
                 break;
             }
         }

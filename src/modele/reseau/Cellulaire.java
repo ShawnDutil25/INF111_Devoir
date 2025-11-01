@@ -137,20 +137,8 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
             this.setNumeroConnexion(numeroConnexion);
 
 
-            String texte = GestionnaireScenario.obtenirMessage(this.numeroLocal);
-            Message nouveauMessage = null;
-
-            if(texte != null && this.antenneConnecte != null){
-                nouveauMessage = new Message(numeroAppele, texte);
-
-                System.out.println("==================================Debut=============================================");
-                System.out.println("Connexion entre deux cellulaires");
-                System.out.println("Numéro de connexion : " + this.numeroConnexion);
-                System.out.println("Cellulaire : " + numeroAppelant + " - Message envoye : "+ nouveauMessage.getMessage() + " Destination " + nouveauMessage.getNumeroDestination());
-                System.out.print("Cellulaire : " + numeroAppele + " - Message recu : ");
-                antenneConnecte.envoyer(nouveauMessage, this.numeroConnexion);
-                System.out.println("===================================Fin==============================================");
-            }
+            System.out.printf("Connexion établie [conn: %d] %s <-> %s%n",
+                    numeroConnexion, numeroAppelant, numeroAppele);
 
             return numeroConnexion;
         }
@@ -200,21 +188,18 @@ public class Cellulaire extends ObjetMobile implements UniteCellulaire {
             return;
         }
 
-        String texte = GestionnaireScenario.obtenirMessage(this.numeroLocal);
-
-
-        if(texte == null){
-            return;
-        }
-
-
-        Message nouveauMessage = new Message(this.numeroConnecte,texte);
+        System.out.printf("Envoyé   [conn: %d] %s -> %s : %s%n", numeroConnexion, this.numeroLocal, this.numeroConnecte, message.getMessage());
+        this.antenneConnecte.envoyer(message, numeroConnexion);
 
     }
 
     @Override
-    public void recevoir(Message message) {
-        System.out.println(message.getMessage());
+    public void recevoir(Message message, int numeroConnexion) {
+        if(this.numeroConnexion == -1){
+            return;
+        }
+
+        System.out.printf("Reçu     [conn: %d] %s <- %s : %s%n", this.numeroConnexion, this.numeroLocal, this.numeroConnecte, message.getMessage());
     }
 
     /**
